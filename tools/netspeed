@@ -1,0 +1,95 @@
+#!/bin/python
+
+"""
+Description:
+    Name: Netspeed (TermuxToolkit)
+    Tool: Internet Speed Checker
+    Author: OmniTotal
+    GitHub: https://github.com/toxic-noob
+    Version: 1.0
+
+Uses:
+    Type "netspeed" to check your Internet Speed
+
+"""
+
+import os
+import sys
+from helpscript import bg_process
+
+
+# Checking Download Speed
+def download():
+    try:
+        bit = speed.download()
+    except:
+        print("\bError")
+        print("\n[\033[91m*\033[37m] Turn On your Internet Connection and Try Again")
+        sys.exit()
+    # Per Seconds
+    ps = bit / (1024*1024)
+    if (ps < 1):
+        kbps = str(ps * 1024)
+        print("\b" + kbps[:kbps.find(".") + 2] + " KBps")
+    elif (ps > 1024):
+        gbps = str(ps / 1024)
+        print("\b" + gbps[:gbps.find(".") + 2] + " GBps")
+    else:
+        mbps = str(ps)
+        print("\b" + mbps[:mbps.find(".") + 2] + " MBps")
+
+# Checking Upload Speed
+def upload():
+    try:
+        bit = speed.upload(pre_allocate=False)
+    except:
+        print("\bError")
+        print("\n[\033[91m*\033[37m] Turn On your Internet Connection and Try Again")
+        sys.exit()
+    # Per Seconds
+    ps = bit / (1024*1024)
+    if (ps < 1):
+        kbps = str(ps * 1024)
+        print("\b" + kbps[:kbps.find(".") + 2] + " KBps")
+    elif (ps > 1024):
+        gbps = str(ps / 1024)
+        print("\b" + gbps[:gbps.find(".") + 2] + " GBps")
+    else:
+        mbps = str(ps)
+        print("\b" + mbps[:mbps.find(".") + 2] + " MBps")
+
+# Starting Main
+if (__name__ == "__main__"):
+    print("\n[\033[95m*\033[37m] Starting Server: ", end = "")
+    
+    # Using Speedtest-cli Module
+    try:
+        import speedtest
+    except ImportError:
+        os.system("pip install speedtest-cli > /dev/null 2>&1")
+        import speedtest
+    
+    try:
+        speed = speedtest.Speedtest()
+    except speedtest.ConfigRetrievalError:
+        print("Error")
+        print("\n[\033[91m*\033[37m] Turn On your Internet Connection and Try Again\n")
+        sys.exit()
+    
+    print("Done")
+    
+    print("\n[\033[92m*\033[37m] Checking Download Speed:  ", end = "")
+    
+    try:
+        bg_process(download)
+    except KeyboardInterrupt:
+        print("\bSkipped")
+    
+    print("\n[\033[92m*\033[37m] Checking Upload Speed:  ", end = "")
+    
+    try:
+        bg_process(upload)
+    except KeyboardInterrupt:
+        print("\bSkipped")
+    
+    sys.exit("")

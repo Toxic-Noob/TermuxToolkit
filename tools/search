@@ -1,0 +1,92 @@
+#!/bin/python
+
+"""
+Description:
+    Name: Search (TermuxToolkit)
+    Tool: Search for Iem from any Path or Storage
+    Author: OmniTotal
+    GitHub: https://github.com/toxic-noob
+    Version: 1.0
+
+Uses:
+    Type "search" followed by the file name or Part of the File name. Example:
+        search "what every body is saying"
+        
+    Use -p / --path Argument to specify Path to Search. Wihout specifying, tool will search from your Storage. Example:
+        search "toxicbomber" -p $HOME
+        search "link-x" -p /sdcard/Tools
+        search "my file" -p . # search from current directory
+        search "whereisit" -p "*" # search from Every Directory
+    
+    Use -t / --termux Argument to search from Termux's directories. Example:
+        search TermuxToolkit -t
+"""
+
+import os
+from sys import stdout, argv
+# Count the amount of searched and found
+count = 1
+found = 0
+
+# Search
+# fifo means, file or folder
+def search(fifo, root="/sdcard/", text = "ytd"):
+    global count, found
+    path = root+"/"+fifo
+    if os.path.isfile(path):
+        if (text in fifo.lower()):
+            stdout.write("\r" + path.replace("/data/data/com.termux/files/home", "$HOME") + "              \n\n")
+            stdout.flush()
+            found += 1
+        
+        stdout.write("\r[ Searched / Found ]: [ " + str(count) + " / " + str(found) + " ]")
+        count += 1
+    elif os.path.isdir(path):
+        try:
+            for dirc in os.listdir(path):
+                search(dirc, path, text)
+        except IOError:
+            pass
+
+
+def start(text, path=["/sdcard", "/storage"]):
+    print("\n[\033[92m*\033[37m] Searching For: " + text + "\n")
+    
+    if (type(path) == str):
+        path = [path]
+    
+    for root in path:
+        try:
+            for dirc in os.listdir(root):
+                if (dirc == "storage"):
+                    continue
+                 
+                search(dirc, root, text)
+        
+        except:
+            pass
+
+    print("\n")
+
+
+if len(argv) > 2:
+    text = argv[1]
+    if (argv[2] == "-p") or (argv[2] == "--path"):
+        path = argv[3]
+        
+        if (path == "*"):
+            path = ["/data/data/com.termux/files/home", "/sdcard", "/storage/"]
+        
+        start(text, path)
+        
+    elif (argv[2] == "-t") or (argv[2] == "--termux"):
+        start(text, "/data/data/com.termux/files/home")
+    else:
+        start(text)
+
+elif len(argv) > 1:
+    text = argv[1]
+    start(text)
+
+else:
+    print("\n[\033[91m!\033[37m] Need an Argument of Search Text\n")

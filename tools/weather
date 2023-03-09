@@ -1,0 +1,143 @@
+#!/bin/python
+
+"""
+Description:
+    Name: Weather (TermuxToolkit)
+    Tool: Check Weather of Your Area/City
+    Author: OmniTotal
+    GitHub: https://github.com/toxic-noob
+    Version: 1.0
+
+Uses:
+    Type "weather" to Check Weather. First time Your Area need to Be Entered.
+    
+    To Enter your area Easyly, Type:
+        weather --list
+        # to get List of Areas to Select from
+    
+    Use "--custom" Argument to Check For Custom Area. Example:
+        weather --custom dhaka
+    
+    Use "--reset" Argument to Reset your Area. Example:
+        weather --reset
+"""
+
+import os
+import time
+import sys
+import datetime
+from helpscript import argparser
+# Supported City List
+cityList = ['Bandarban', 'Barishal', 'Bhola', 'Brahmanbaria', 'Chandpur', "Cox's Bazar", 'Dhaka', 'Dinajpur', 'Faridpur', 'Feni', 'Gaibandha', 'Gazipur', 'Gopalganj', 'Habiganj', 'Jamalpur', 'Jhalokati', 'Jhenaidah', 'Joypurhat', 'Khulna', 'Kishoreganj', 'Kurigram', 'Kushtia', 'Lakshmipur', 'Lalmonirhat', 'Madaripur', 'Magura', 'Manikganj', 'Munshiganj', 'Mymensingh', 'Naogaon', 'Narail', 'Narayanganj', 'Narsingdi', 'Nawabganj', 'Netrokona', 'Nilphamari', 'Pabna', 'Panchagarh', 'Patuakhali', 'Pirojpur', 'Rajbari', 'Rajshahi', 'Rangpur', 'Satkhira', 'Shariatpur', 'Sherpur', 'Sylhet', 'Tangail', 'Thakurgaon', 'Exit']
+
+# Set User City
+def setCity():
+    print("\n    \033[37m[\033[92m*\033[37m] Please Select Your City from Below:\n")
+    
+    for i in range(0, 25):
+        city_01 = cityList[i]
+        city_02 = cityList[i+25]
+        
+        if (len(city_01) < 7):
+            print(f"    [\033[92m{(str(i+1) if (len(str(i+1)) > 1) else '0' + str(i+1))}\033[37m] {city_01}\t\t[\033[92m{i+26}\033[37m] {city_02}")
+        elif (len(city_01) < 14):
+            print(f"    [\033[92m{(str(i+1) if (len(str(i+1)) > 1) else '0' + str(i+1))}\033[37m] {city_01}\t[\033[92m{i+26}\033[37m] {city_02}")
+        else:
+            print(f"    [\033[92m{(str(i+1) if (len(str(i+1)) > 1) else '0' + str(i+1))}\033[37m] {city_01}\t[\033[92m{i+26}\033[37m] {city_02}")
+    
+    
+    op = input("\n    [\033[92m*\033[37m] Enter your Cityt\033[92m:> \033[37m")
+    if not (op=="") and not (op == "0"):
+        if (op[0] == "0"):
+            op = op[1:]
+    
+    while not (op in [str(x) for x in range(1, 51)]):
+        print("\n    [\033[91m!\033[37m] Not an Option!")
+        op = input("\n    [\033[92m*\033[37m] Enter your City\033[92m:> \033[37m")
+        if not (op=="") and not (op == "0"):
+            if (op[0] == "0"):
+                op = op[1:]
+    
+    if (op == "50"):
+        sys.exit("\033[37m")
+    
+    city = cityList[int(op)-1]
+    open(".area", "w").write(city)
+
+
+# Parsing Weather
+def weather(city):
+    print("\n[\033[92m*\033[37m] Gathering Data: ", end = "")
+    
+    import requests
+    
+    url = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&APPID=43d5939ed78fea35f571312a7825b5c2&units=metric"
+    responseData = requests.get(url).json()
+    
+    if not (responseData["cod"] == 200):
+        print("Error")
+        print("\n\033[37m[\033[91m*\033[37m] City \"" + city + "\" Not Found!")
+        print("\n\033[37m[\033[92m*\033[37m] Add \033[92m--list\033[37m Argument to Select area From List\n")
+        if not (argv.custom):
+            os.system("rm .area > /dev/null 2>&1")
+        exit()
+    
+    city = responseData.get("name")
+    country = responseData.get("sys").get("country")
+    sunriseStamp = responseData.get("sys").get("sunrise")
+    sunsetStamp = responseData.get("sys").get("sunset")
+    
+    sunrise = datetime.datetime.fromtimestamp(sunriseStamp).strftime('%I:%M %p')
+    sunset = datetime.datetime.fromtimestamp(sunsetStamp).strftime('%I:%M %p')
+    
+    temperature = responseData.get("main").get("temp")
+    feelsLike = responseData.get("main").get("feels_like")
+    
+    sky = responseData.get("weather")[0].get("description")
+    humidity = responseData.get("main").get("humidity")
+    wind = responseData.get("wind").get("speed")
+    
+    print("Done")
+    time.sleep(0.5)
+    
+    print(f"\n\033[95m[ \033[37mArea \033[95m]\033[94m : \033[37m{city}, {country}")
+    
+    print(f"\n\033[95m[ \033[37mSunrise \033[95m]\033[94m : \033[37m{sunrise}")
+    print(f"\033[95m[ \033[37mSunset  \033[95m]\033[94m : \033[37m{sunset}")
+    
+    print(f"\n\033[95m[ \033[37mTemperature \033[95m]\033[94m : \033[37m{temperature}° Celsius")
+    print(f"\033[95m[ \033[37mFeels  Like\033[95m ]\033[94m : \033[37m{feelsLike}° Celsius")
+    
+    print(f"\n\033[95m[   \033[37mSky\033[95m    ]\033[94m : \033[37m{sky.title()}")
+    print(f"\033[95m[ \033[37mHumidity\033[95m ]\033[94m : \033[37m{humidity}%")
+    print(f"\033[95m[   \033[37mWind\033[95m   ]\033[94m : \033[37m{wind} m/s\n")
+
+parser = argparser()
+parser.add_description("Get Weather Information")
+parser.add_argument("--custom", "custom", help="Enter your custom City name following by the Argument")
+parser.add_argument("--list", "list", help="Enter this Argument to see Supported City's List", takeArg = "false")
+parser.add_argument("--reset", "reset", help="Enter this Argument to reset your Default City", takeArg = "false")
+
+argv = parser.parsed()
+
+if (argv.custom):
+    city = argv.custom
+elif (argv.list):
+    setCity()
+    city = open(".area", "r").read().replace("\n", "")
+elif (argv.reset):
+    os.system("rm .area > /dev/null 2>&1")
+    print("\n\033[37m[\033[92m*\033[37m] Default City Reseted Successfully\n")
+    exit()
+else:
+    if not os.path.exists(".area"):
+        city = input("\n\033[37m[\033[92m*\033[37m] Enter your City Name:> ")
+        open(".area", "w").write(city)
+    
+    city = open(".area", "r").read().replace("\n", "")
+    if (city == ""):
+        city = input("\n\033[37m[\033[92m*\033[37m] Enter Your Default City Name:> ")
+        open(".area", "w").write(city)
+        city = open(".area", "r").read()
+
+weather(city.title())

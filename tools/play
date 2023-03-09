@@ -1,0 +1,79 @@
+#!/bin/python
+
+"""
+Description:
+    Name: Play (TermuxToolkit)
+    Tool: Play Song Directly from YouTube just by Name
+    Author: OmniTotal
+    GitHub: https://github.com/toxic-noob
+    Version: 1.0
+
+Uses:
+    Type "play" followed by the Song name. Example:
+        play "Never Gonna Give you Up"
+"""
+
+import os
+import sys
+
+# This 'search' function code Credit goes to PyWhatKit
+def search(topic):
+    import requests
+    """Will play video on following topic, takes a
+bout 10 to 15 seconds to load"""
+    url = 'https://www.youtube.com/results?q=' + topic
+    count = 0
+    cont = requests.get(url)
+    data = cont.content
+    data = str(data)
+    lst = data.split('"')
+    for i in lst:
+        count+=1
+        if i == 'WEB_PAGE_TYPE_WATCH':
+            break
+    if lst[count-5] == "/results":
+        return None
+
+    return "https://www.youtube.com"+lst[count-5]
+
+
+# Play Music
+def play(topic):
+    print("\n[\033[92m*\033[37m] Fetching Your Song: ", end = "")
+    
+    try:
+        url = search(topic)
+    except:
+        url = None
+    
+    if (url == None):
+        print("Error")
+        print("\n[\033[91m!\033[37m] Error Occured. Please try again later\n")
+        sys.exit()
+    
+    print("Done")
+    print(url)
+    print("\n[\033[92m*\033[37m] Please wait, Playing Your Song, " + song)
+    print("\n[\033[92m*\033[37m] Type ctrl + c to stop Playing!\n")
+    #os.system("mpv \"" + url + "\" > /dev/null 2>&1")
+    os.system("mpv \"" + url + "\"")
+    sys.exit()
+
+
+# Stop Music
+def stop():
+    os.system("killall mpv > /dev/null 2>&1")
+    print("\n[\033[92m*\033[37m] Song Playing Stopped\n")
+    sys.exit()
+
+
+# Starting Script
+if (len(sys.argv) == 1):
+    stop()
+elif (len(sys.argv) == 2):
+    song = sys.argv[1]
+    play(song)
+else:
+    song = " ".join(sys.argv[1:])
+    play(song)
+

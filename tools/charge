@@ -1,0 +1,67 @@
+#!/bin/python
+
+"""
+Description:
+    Name: Charge (TermuxToolkit)
+    Tool: Monitor Phone Charging
+    Author: OmniTotal
+    GitHub: https://github.com/toxic-noob
+    Version: 1.0
+
+Uses: (After installing Tool)
+    Type "charge" to start monitoring
+    Default Charge goal is 100 %
+    You can use custom Charge Amount By Typing
+    "charge amount"
+    Example:
+        charge 66
+"""
+
+from subprocess import getoutput
+from time import sleep
+from sys import argv
+import json
+from os import system
+
+def checkCharge(prsnt):
+    crgData = json.loads(getoutput("termux-battery-status"))
+    
+    if ((crgData["percentage"] == prsnt) or (crgData["percentage"] > prsnt)) and (crgData["plugged"] == "UNPLUGGED"):
+        system("termux-vibrate")
+        system("termux-tts-speak \"Sir, phone charge status is Good\"")
+        exit()
+    
+    if (crgData["percentage"] == prsnt) or (crgData["percentage"] > prsnt):
+        system("termux-vibrate")
+        system("termux-tts-speak \"Sir, Your Phone Charged " + str(crgData["percentage"]) + " percent! \"")
+        system("termux-vibrate")
+        sleep(120) # 2 Minutes
+    
+    elif (crgData["plugged"] == "UNPLUGGED"):
+        system("termux-tts-speak \"Sir, Your phone is not charging. Please plug in your phone!\"")
+        sleep(180) # 3 Minutes
+        checkCharge(prsnt)
+    
+    elif ((prsnt - crgData["percentage"]) <= 5):
+        sleep(5*60) # 5 Minues
+        checkCharge(prsnt)
+    
+    else:
+        sleep(12 * 60) # 12 Minutes
+        checkCharge(prsnt)
+
+
+if (__name__ == "__main__"):
+    print("\n[\033[92m*\033[37m] Phone Charge Monitoring On!")
+    print("\n[\033[92m*\033[37m] Press ctrl + c to Exit\n")
+    
+    prsnt = 100
+
+    if (len(argv) > 1):
+        if (argv[1].isdigit()):
+            prsnt = int(argv[1])
+    
+    try:
+        checkCharge(prsnt)
+    except KeyboardInterrupt:
+        exit()

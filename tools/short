@@ -1,0 +1,231 @@
+#!/bin/python
+
+"""
+Description:
+    Name: Short (TermuxToolkit)
+    Tool: Shorten your Large URL
+    Author: OmniTotal
+    GitHub: https://github.com/toxic-noob
+    Version: 1.0
+    
+Uses:
+    Use "short" to Shorten your Url. Example:
+        short "https://google.com"
+    
+    Use --list Argument to Select your Shorten Domain (Default is.gd). Example:
+        short "https://github.com" --list
+    
+    Has more then 10 Domains to Use from
+"""
+
+import sys
+from helpscript import argparser
+
+#Show Error
+def error(code):
+    if (code == "net"):
+        print("Error")
+        print("\n\033[37m[\033[91m!\033[37m] Network Error. Check Your Internet Connection.\n")
+        sys.exit()
+    
+    elif not (code == 200):
+        print("Error")
+        print("\n\033[37m[\033[91m!\033[37m] Shorting Error. Try another Server.\n")
+        sys.exit()
+
+# Show Domain List For Custom Domain Selection
+def showDomainList():
+    servers = {"is.gd": "isgd", "cutt.ly": "cuttly", "snip.ly": "sniply", "v.gd": "vgd", "3c5.com": "3c5", "9k.gg": "9k", "bitly.lc": "bitlylc", "shorturl.ae": "shorturlae", "bitly.ws": "bitlyws", "hoo.gl": "hoogl", "xy2.eu": "xy2", "tinyurl.mobi": "tinyurlmobi", "shorturl.at": "shorturlat"}
+    
+    print("\n\033[37m[\033[92m*\033[37m] Choose Your Domain...\n")
+    c = 1
+    for server in servers:
+        sl = str(c)
+        if (len(sl) == 1):
+            sl = "0" + sl
+        
+        print("\033[37m[\033[92m" + sl + "\033[37m] " + server)
+        c += 1
+    
+    print("\033[37m[\033[92m" + str(c) + "\033[37m] Exit")
+    
+    op = input("\n\033[37m[\033[92m*\033[37m] Enter Your Choice:> ")
+    
+    while (int(op) > (len(servers) + 1)):
+        print("\n\033[37m[\033[91m!\033[37m] Enter Your Choice:> ")
+        op = input("\033[37m[\033[92m*\033[37m] Enter Your Choice:> ")
+    
+    if (op == str(c)):
+        sys.exit("")
+    
+    c = 1
+    for server in servers:
+        if (c == int(op)):
+            chosen = servers[server]
+            break
+        c += 1
+    
+    return chosen
+
+#Short Url Main Function
+def short(longUrl, domain):
+    print("\n\033[37m[\033[92m*\033[37m] Sending Request: ", end="")
+    import requests
+    
+    if (domain == "isgd"):
+        try:
+            response = requests.get("https://is.gd/create.php?format=simple&url=" + longUrl)
+        except requests.exceptions.ConnectionError:
+            error("net")
+        
+        error(response.status_code)
+        
+        shortUrl = response.text
+    
+    elif (domain == "cuttly"):
+        apiKey = "af8c6a9bebc3a7415ffe7d7f493c784f45718"
+        try:
+            response = requests.get("https://cutt.ly/api/api.php?key=" + apiKey + "&short=" + longUrl)
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.json()["url"]["shortLink"]
+    
+    elif (domain == "sniply"):
+        url = "https://snip.ly/pub/snip"
+        data = {"url": longUrl, "cta_message": "Sign up and customize the CTA!", "button_url": "https://sniply.io/pricing/"}
+        try:
+            response = requests.post(url, json=data)
+        except requests.exceptions.ConnectionError:
+            error("net")
+        
+        if not (response.status_code == 201) and not (response.status_code == 200):
+            error(response.status_code)
+        
+        shortUrl = response.json()["snip_url"]
+    
+    elif (domain == "vgd"):
+        try:
+            response = requests.get("https://v.gd/create.php?format=simple&url=" + longUrl)
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.text
+    
+    elif (domain == "3c5"):
+        try:
+            response = requests.get("https://www.3c5.com/url.php?url=" + longUrl + "&domain=")
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.json()["short"]
+    
+    elif (domain == "9k"):
+        try:
+            response = requests.get("https://www.3c5.com/url.php?url=" + longUrl + "&domain=1")
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.json()["short"]
+    
+    elif (domain == "bitlylc"):
+        try:
+            response = requests.get("https://www.3c5.com/url.php?url=" + longUrl + "&domain=2")
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.json()["short"]
+    
+    elif (domain == "shorturlae"):
+        try:
+            response = requests.get("https://www.3c5.com/url.php?url=" + longUrl + "&domain=3")
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.json()["short"]
+    
+    elif (domain == "bitlyws"):
+        try:
+            response = requests.get("http://bitly.ws/create.php?url=" + longUrl)
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.url.replace("/show", "")
+    
+    elif (domain == "hoogl"):
+        try:
+            response = requests.get("http://hoo.gl/create.php?url=" + longUrl)
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.url.replace("/show", "")
+    
+    elif (domain == "xy2"):
+        try:
+            response = requests.get("http://xy2.eu/create.php?url=" + longUrl)
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.url.replace("/show", "")
+    
+    elif (domain == "tinyurlmobi"):
+        try:
+            response = requests.get("http://tinyurl.mobi/create.php?url=" + longUrl)
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        shortUrl = response.url.replace("/show", "")
+    
+    elif (domain == "shorturlat"):
+        url = "https://www.shorturl.at/shortener.php"
+        data = {"u": longUrl}
+        try:
+            response = requests.post(url, data=data)
+        except requests.exceptions.ConnectionError:
+            error("net")
+
+        error(response.status_code)
+        
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        shortUrl = "https://" + soup.find(id="shortenurl")["value"]
+    
+    print("Done" )
+    print("\n\033[37m[\033[92m Short Url \033[37m]: " + shortUrl + "\n")
+
+
+if (__name__ == "__main__"):
+    parser = argparser()
+    
+    parser.add_argument("url", "url", required = "true", takeArg = "only", help = "Enter Your Long Url")
+    parser.add_argument("--list", "showlist", required = "false", takeArg = "false", help = "Enter this Argument to Select Custom Server")
+    
+    args = parser.parsed()
+    
+    domain = "isgd"
+    if (args.showlist):
+        domain = showDomainList()
+    
+    short(args.url, domain)
+

@@ -1,0 +1,228 @@
+#!/bin/python
+
+"""
+Description:
+    Name: Share (TermuxToolkit)
+    Tool: Upload and Share file Anonymously from your Device
+    Author: OmniTotal
+    GitHub: https://github.com/toxic-noob
+    Version: 1.0
+    
+Uses:
+    This tool has three Arguments:
+        -u / --upload
+        -d / --download
+        --anon
+    
+    -u / --upload:
+        Upload your Files using this Argument. Example:
+            share -u file.txt
+            share -u /path/to/your/file.py
+    
+    -d / --download:
+        Download Files of Supported Websites (gofile, anonfiles). Example:
+            share -d https://gofile.io/xxxxxx
+            share -d htps://anonfiles.com/xxxxx
+    
+    --anon:
+        Default site for uploading files is Gofile.io. But you can use Anonfiles.com if you want, by using this argument. Example:
+            share -u file.txt --anon
+
+API Credit:
+    https://gofile.io
+    https://anonfiles.com
+"""
+
+
+import os
+import time
+from datetime import datetime
+import json
+import subprocess as sb
+import helpscript
+
+
+# Upload File to GoFile
+def uploadtoGoFile(path):
+    if not os.path.exists(path):
+        print("\n[\033[91m!\033[37m] Your File Does not Exists!\n")
+        exit()
+    
+    print("\n[\033[92m*\033[37m] Getting Server: ", end= "")
+    try:
+        serData = json.loads(sb.getoutput("curl -s \"https://api.gofile.io/getServer\""))
+    except:
+        serData["status"] = "error"
+    
+    if not (serData["status"] == "ok"):
+        server = "store1"
+    else:
+        server = serData["data"]["server"]
+    
+    print("Done")
+    
+    print("\n[\033[92m*\033[37m] Uploading Your File: ")
+    
+    try:
+        data = json.loads(sb.getoutput("curl -s -F \"file=@" + path + "\" https://" + server +".gofile.io/uploadFile --progress-bar"))
+    except:
+        data["status"] = "error"
+    
+    if not (data["status"] == "ok"):
+        print("\n[\033[91m!\033[37m] Error Occured!\n")
+        input("[\033[92m*\033[37m] Press Enter to Try Again....")
+        uploadtoGoFile(path)
+    
+    print("\n[\033[92m URL \033[37m]: " + data["data"]["downloadPage"])
+    exit("")
+
+
+# Upload File to AnonFiles
+def uploadtoAnonFiles(path):
+    if not os.path.exists(path):
+        print("\n[\033[91m!\033[37m] Your File Does not Exists!\n")
+        exit()
+    
+    print("\n[\033[92m*\033[37m] Uploading Your File: ")
+    
+    try:
+        data = json.loads(sb.getoutput("curl -s -F \"file=@" + path + "\" https://api.anonfiles.com/upload --progress-bar"))
+    except:
+        data["status"] = "error"
+    
+    if not (data["status"] == True):
+        print("\n[\033[91m!\033[37m] Error Occured!\n")
+        input("[\033[92m*\033[37m] Press Enter to Try Again....")
+        uploadtoGoFile(path)
+    
+    try:
+        long_url = data["data"]["file"]["url"]["full"]
+        short_url = data["data"]["file"]["url"]["short"]
+    except:
+        print("\n[\033[91m!\033[37m] Error Occured!\n")
+        input("[\033[92m*\033[37m] Turn on a VPN and Press Enter to Try Again....")
+        uploadtoAnonFiles(path)
+
+    print("\n\033[37m[\033[92m URL 1 \033[37m]: " + long_url)
+    print("\n\033[37m[\033[92m URL 2 \033[37m]: " + short_url)
+
+    exit("")
+
+
+# Download AnonFiles File
+def downloadAnonFile(url):
+    print("\n[\033[92m*\033[37m] Fetching File URL: ", end= "")
+    from bs4 import BeautifulSoup
+    response = requests.get(url)
+    
+    if not (response.status_code == 200):
+        print("Error")
+        print("\n[\033[91m!\033[37m] Turn VPN on and try Again or Check your URL or Download the File Manually")
+        exit()
+    
+    print("Done")
+    soup = BeautifulSoup(response.text, 'html.parser')
+    tag = soup.find("a", id="download-url")
+    downUrl = tag["href"]
+    size = str(tag)[str(tag).find("(") + 1:str(tag).find(")")]
+    name = downUrl.split("/")[-1]
+    
+    print("\n[\033[92m File Name  \033[37m]: " + name)
+    print("[\033[92m File Size  \033[37m]: " + size)
+    print("[\033[92m File State \033[37m]: Downloading: ")
+    
+    downPath = "/sdcard/Download/" + name
+    if (args.place_here):
+        downPath = name
+    
+    os.system("wget -O \"" + downPath + "\" \"" + downUrl + "\" -q --show-progress")
+    os.system("touch -d \"" + str(datetime.now()) + "\" \"" + downPath + "\"")
+    
+    if (args.place_here):
+        print("\n[\033[92m*\033[37m]: File Saved in this Directory\n")
+    else:
+        print("\n[\033[92m*\033[37m]: File Saved in Downloads\n")
+    exit()
+
+
+# Download GoFile File
+def downloadGoFile(url):
+    print("\n[\033[92m*\033[37m] Fetching File URL: ", end= "")
+    
+    ses = requests.Session()
+    acc = ses.get("https://api.gofile.io/createAccount").json()
+    
+    contentId = url.split("/")[-1]
+    
+    if not (acc["status"] == "ok"):
+        print("Error")
+        print("\n[\033[91m!\033[37m] Check your URL or Download the File Manually")
+        exit()
+    
+    token = acc["data"]["token"]
+    
+    fileData = ses.get("https://api.gofile.io/getContent?contentId=" + contentId + "&token=" + token + "&websiteToken=12345").json()
+    
+    if not (fileData["status"] == "ok"):
+        print("Error")
+        print("\n[\033[91m!\033[37m] Download the File Manually")
+        exit()
+    
+    contents = fileData["data"]["contents"]
+    
+    print("Done")
+    time.sleep(0.3)
+    for content in contents:
+        name = contents[content]["name"]
+        tmp = contents[content]["size"] / (1024 * 1024)
+        size = str(tmp)[:str(tmp).find(".") + 2] + "MB"
+        if (tmp < 1):
+            tmp = tmp * 1024
+            size = str(tmp)[:str(tmp).find(".") + 2] + "KB"
+        
+        downUrl = contents[content]["link"]
+        
+        print("\n[\033[92m File Name  \033[37m]: " + name)
+        print("[\033[92m File Size  \033[37m]: " + size)
+        print("[\033[92m File State \033[37m]: Downloading: ")
+        
+        downPath = "/sdcard/Download/" + name
+        if (args.place_here):
+            downPath = name
+    
+        os.system("wget -O \"" + downPath + "\" --header=\"cookie:accountToken=" + token + "\" \"" + downUrl + "\" -q --show-progress")
+        os.system("touch -d \"" + str(datetime.now()) + "\" \"" + downPath + "\"")
+        
+    if (args.place_here):
+        print("\n[\033[92m*\033[37m]: File Saved in this Directory\n")
+    else:
+        print("\n[\033[92m*\033[37m]: File Saved in Downloads\n")
+    exit()
+
+if (__name__ == "__main__"):
+    argv = helpscript.argparser()
+    argv.add_description("Share Files through Internet")
+    argv.add_argument(("-u", "--upload"), "upload", required = "optional", help="Enter Your File Path Here")
+    argv.add_argument(("-d", "--download"), "download", required = "optional", help="Enter Your Download URL Here")
+    argv.add_argument("--anon", "anonfiles", required = "false", takeArg = "false", help = "Add this Argument if you want to Upload your file on AnonFiles Sever. GoFile is Default")
+    argv.add_argument("--here", "place_here", required = "false", takeArg = "false", help = "Add this Argument if You want to Download file in Current Directory. No extra Argument needed")
+    
+    args = argv.parsed()
+    
+    try:
+        if (args.upload):
+            if (args.anonfiles):
+                uploadtoAnonFiles(args.upload)
+            else:
+                uploadtoGoFile(args.upload)
+        elif (args.download):
+            import requests
+            if ("anonfiles.com" in args.download):
+                downloadAnonFile(args.download)
+            elif ("gofile.io" in args.download):
+                downloadGoFile(args.download)
+            else:
+                print("\n[\033[91m!\033[37m]: Website isn't Supported\n")
+    except:
+        print("\n\033[37m[\033[91m!\033[37m] Error Occured!\n")
+        exit()

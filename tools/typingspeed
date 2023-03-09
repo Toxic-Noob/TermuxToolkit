@@ -1,0 +1,104 @@
+#!/bin/python
+
+"""
+Description:
+    Name: TypingSpeed (TermuxToolkit)
+    Tool: Typing Speed Checker
+    Author: OmniTotal
+    GitHub: https://github.com/toxic-noob
+    Version: 1.0
+
+Uses:
+    Just type "typingspeed" to check Your Typing Speed Limit!
+"""
+
+import sys
+import time
+import random
+import shutil
+
+columns = shutil.get_terminal_size().columns
+
+# Show Result
+def showResult(startTime, endTime, userInput, sentence):
+    if (len(userInput) == 1) and (userInput[0] == ""):
+        userInput = []
+    
+    sec = endTime - startTime
+    if (sec > 60):
+        tmp = str(sec/60)
+        took = tmp[:tmp.find(".") + 2] + " Minutes"
+    else:
+        took = str(sec)[:str(sec).find(".") + 2] + " Seconds"
+    
+    correct = 0
+    preview = ""
+    for i in range(len(sentence)):
+        try:
+            if (sentence[i] == userInput[i]):
+                preview += "\033[92m" + sentence[i] + " "
+                correct += 1
+            else:
+                preview += "\033[91m" + sentence [i] + " "
+        except:
+            preview += "\033[91m" + sentence [i] + " "
+    
+    gwpm = int((len(userInput) / sec) * 60)
+    wpm = int((correct / sec) * 60)
+    acc = wpm  * 100 / gwpm
+    acc = str(acc)[:str(acc).find(".") + 2]
+    
+    time.sleep(0.5)
+    print("\x1B[3A")
+    print("[ Result ]".center(columns))
+    print("\n\033[37m[\033[92m*\033[37m] Time Took: " + took)
+    print("\n\033[37m[\033[92m*\033[37m] Total Typed Words: " + str(len(userInput)))
+    print("\033[37m[\033[92m*\033[37m] Correct Words: " + str(correct))
+    print("\033[37m[\033[92m*\033[37m] Incorrect Words: " + str(len(sentence) - correct))
+    print("\033[37m[\033[92m*\033[37m] Gross Words Per Minute: " + str(gwpm))
+    print("\033[37m[\033[92m*\033[37m] Net Words Per Minute: " + str(wpm))
+    print("\033[37m[\033[92m*\033[37m] Accuracy: " + str(acc) + "%")
+    print("\033[37m[\033[92m*\033[37m] Preview: \n")
+    print(preview)
+    exit("\033[37m")
+
+
+# Starting Typing Speed Checker
+def start(sentence):
+    print("")
+    print("[ Sentence ]".center(columns))
+    print("\n" + sentence)
+    
+    input("\n[\033[92m*\033[37m] Press Enter To Start...")
+    print("")
+    
+    line1 = sentence[:columns]
+    line2 = sentence[columns:columns+columns]
+    
+    if not (sentence[columns+columns:] == ""):
+        line3 = sentence[columns+columns:columns+columns+columns]
+        line3 = " ".join(line3.split(" ")[:-1])
+    else:
+        line3 = ""
+    
+    sentence = (line1 + line2 + line3).split(" ")
+    
+    print("\033[90m" + line1)
+    print(line2)
+    print(line3, end="\n\n\n")
+    
+    print("\x1B[3A\x1B[3A")
+    
+    startTime = time.time()
+    userInput = input("\033[37m").split(" ")
+    endTime = time.time()
+    print("\n\n")
+    showResult(startTime, endTime, userInput, sentence)
+
+# Initializing Script
+if (__name__ == "__main__"):
+    currentPath = sys.argv[0].split("/")
+    SFP = "/".join(currentPath[:-1])
+    sentences = open(("sentences.txt" if SFP=="" else SFP+"/sentences.txt"), "r").readlines()
+    sentence = random.choice(sentences).replace("\n", "")
+    start(sentence)
