@@ -63,11 +63,7 @@ if (__name__ == "__main__"):
     print("\n[\033[95m*\033[37m] Starting Server: ", end = "")
     
     # Using Speedtest-cli Module
-    try:
-        import speedtest
-    except ImportError:
-        os.system("pip install speedtest-cli > /dev/null 2>&1")
-        import speedtest
+    import speedtest
     
     try:
         speed = speedtest.Speedtest()
