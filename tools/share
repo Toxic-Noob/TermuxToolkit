@@ -223,6 +223,6 @@ if (__name__ == "__main__"):
                 downloadGoFile(args.download)
             else:
                 print("\n[\033[91m!\033[37m]: Website isn't Supported\n")
-    except:
+    except Exception as e:
         print("\n\033[37m[\033[91m!\033[37m] Error Occured!\n")
         exit()
