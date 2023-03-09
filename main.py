@@ -12,11 +12,11 @@ Note:
     But consider giving Credit!
 """
 
-
 import os
 import time
 import sys
 import shutil
+import importlib.util
 
 # Consts
 toolList = ["d-pro", "netspeed", "text", "weather", "search", "typingspeed", "share", "short", "charge", "play"]
@@ -47,6 +47,11 @@ def logo():
     print("\033[94m│ \033[95mCoder  \033[92m: \033[37mOmniMate                 \033[92mV1.0\033[94m │".center(columns+29))
     print("\033[94m└────────────────────────────────────────┘\033[37m".center(columns+10))
 
+
+# Check if Setup.py Executed
+def checkSetup():
+    if (importlib.util.find_spec("helpscript") == ""):
+        os.system("python setup.py")
 
 # Install Tools
 def install(tool):
@@ -258,5 +263,6 @@ def menu():
     
     funcList[int(op) -1 ]()
 
-
-menu()
+if (__name__ == "__main__"):
+    checkSetup()
+    menu()
