@@ -28,6 +28,9 @@ os.system("pip install bs4")
 print("\n    [\033[92m*\033[37m] Installing helpscript...\n")
 os.system("pip install helpscript")
 
+print("\n    [\033[92m*\033[37m] Installing Speestest-Cli")
+os.system("pip install speedtest-cli")
+
 if not (storage):
     print("\n    [\033[92m*\033[37m] Grant storage Permission to Termux...\n")
     os.system("termux-setup-storage")
