@@ -17,7 +17,10 @@ print("\n    [\033[92m!\033[47m] Installing Required Packages, Please wait...")
 
 if not (termuxApi):
     print("\n    [\033[92m*\033[37m] Installing Termux-Api...\n")
-    os.system("pkg install termux-api")
+    os.system("pkg install termux-api -y")
+
+print("\n    [\033[92m*\033[37m] Installing mpv...\n")
+os.system("pkg install mpv -y")
 
 print("\n    [\033[92m*\033[37m] Installing requests...\n")
 os.system("pip install requests")
