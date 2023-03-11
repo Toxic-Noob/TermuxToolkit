@@ -102,7 +102,7 @@ play "Never Gonna Give You Up"
 ```
 apt update -y
 apt upgrade -y
-pkg install python git -y
+pkg install python git mpv -y
 git clone https://github.com/toxic-noob/TermuxToolkit
 cd TermuxToolkit
 python setup.py # Important
