@@ -52,7 +52,6 @@ def play(topic):
         sys.exit()
     
     print("Done")
-    print(url)
     print("\n[\033[92m*\033[37m] Please wait, Playing Your Song, " + song)
     print("\n[\033[92m*\033[37m] Type ctrl + c to stop Playing!\n")
     #os.system("mpv \"" + url + "\" > /dev/null 2>&1")
